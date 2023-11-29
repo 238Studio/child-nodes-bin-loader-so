@@ -19,10 +19,10 @@ func (so *SoPackage) GetName() string {
 	return so.name
 }
 
-// GetId 获取id
+// GetID 获取id
 // 传入：无
 // 传出：id
-func (so *SoPackage) GetId() int {
+func (so *SoPackage) GetID() int {
 	return so.id
 }
 
@@ -33,10 +33,10 @@ func (so *SoPackage) GetFunctions() []string {
 	return so.functions
 }
 
-// GetFunctionsArgTypes 获取函数入参类型
+// GetFunctionsArgsTypes 获取函数入参类型
 // 传入：函数名
 // 传出：函数入参类型,错误
-func (so *SoPackage) GetFunctionsArgTypes(methodName string) ([]string, error) {
+func (so *SoPackage) GetFunctionsArgsTypes(methodName string) ([]string, error) {
 	functionArgs, isEXIST := so.functionsArgTypes[methodName]
 	if !isEXIST {
 		return nil, util.NewError(_const.CommonException, _const.Bin, errors.New("function not exist"))
@@ -44,10 +44,10 @@ func (so *SoPackage) GetFunctionsArgTypes(methodName string) ([]string, error) {
 	return functionArgs, nil
 }
 
-// GetFunctionsReturnTypes 获取函数返回值类型
+// GetFunctionReturnTypes 获取函数返回值类型
 // 传入：函数名
 // 传出：函数返回值类型,错误
-func (so *SoPackage) GetFunctionsReturnTypes(methodName string) ([]string, error) {
+func (so *SoPackage) GetFunctionReturnTypes(methodName string) ([]string, error) {
 	functionReturn, isEXIST := so.functionsReturnTypes[methodName]
 	if !isEXIST {
 		return nil, util.NewError(_const.CommonException, _const.Bin, errors.New("function not exist"))
@@ -98,9 +98,9 @@ func (so *SoPackage) Execute(method string, args []uintptr, re uintptr) (err err
 // LoadBinPackage 根据路径加在二进制包
 // 传入：路径
 // 传出：包对象,错误
-func (soLoader *SoLoader) LoadBinPackage(soPath string) (*SoPackage, error) {
-	soInfoPath := soPath + ".json"  //so包对应的描述文件地址
-	soPackagePath := soPath + ".so" //so包地址
+func (soLoader *SoLoader) LoadBinPackage(path string) (*SoPackage, error) {
+	soInfoPath := path + ".json"  //so包对应的描述文件地址
+	soPackagePath := path + ".so" //so包地址
 
 	//加载so包
 	so, err := plugin.Open(soPackagePath)
