@@ -4,7 +4,7 @@ import (
 	"testing"
 	"unsafe"
 
-	so "github.com/238Studio/child-nodes-hex-loader-so"
+	so "github.com/238Studio/child-nodes-bin-loader-so"
 )
 
 func TestSo(t *testing.T) {

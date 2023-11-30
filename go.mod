@@ -5,7 +5,6 @@ go 1.21.1
 require (
 	github.com/238Studio/child-nodes-assist v1.11.0
 	github.com/238Studio/child-nodes-bin-loader v1.0.3
-	github.com/238Studio/child-nodes-hex-loader-so v0.1.0-alpha
 	github.com/json-iterator/go v1.1.12
 )
 
