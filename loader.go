@@ -98,7 +98,15 @@ func (so *SoPackage) Execute(method string, args []uintptr, re uintptr) (err err
 // LoadBinPackage 根据路径加在二进制包
 // 传入：路径
 // 传出：包对象,错误
-func (soLoader *SoLoader) LoadBinPackage(path string) (*SoPackage, error) {
+func (soLoader *SoLoader) LoadBinPackage(path string) (soPackage *SoPackage, err error) {
+	//捕获恐慌
+	defer func() {
+		if er := recover(); er != nil {
+			//特例panic,级别非fatal,牵涉到cgo
+			err = util.NewError(_const.CommonException, _const.Bin, errors.New(er.(string)))
+		}
+	}()
+
 	soInfoPath := path + ".json"  //so包对应的描述文件地址
 	soPackagePath := path + ".so" //so包地址
 
@@ -125,7 +133,7 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (*SoPackage, error) {
 	}
 
 	//创建包对象
-	soPackage := &SoPackage{
+	soPackage = &SoPackage{
 		name:                 payload.Name,
 		id:                   0,
 		functions:            payload.Functions,
@@ -143,14 +151,28 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (*SoPackage, error) {
 		soLoader.soCounter[soPackage.name]++
 	}
 
+	//加入集合
+	if _, ok := soLoader.Sos[soPackage.name]; !ok {
+		soLoader.Sos[soPackage.name] = make(map[int]*SoPackage)
+	}
+	soLoader.Sos[soPackage.name][soPackage.id] = soPackage
+
 	return soPackage, nil
 }
 
 // ReleasePackage 释放so包
 // 传入：二进制执行包
 // 传出：错误
-func (soLoader *SoLoader) ReleasePackage(binPackage *loader.BinPackage) error {
-	err := (*binPackage).Execute("Release", nil, 0)
+func (soLoader *SoLoader) ReleasePackage(binPackage *loader.BinPackage) (err error) {
+	//捕获恐慌
+	defer func() {
+		if er := recover(); er != nil {
+			//特例panic,级别非fatal,牵涉到cgo
+			err = util.NewError(_const.CommonException, _const.Bin, errors.New(er.(string)))
+		}
+	}()
+
+	err = (*binPackage).Execute("Release", nil, 0)
 	if err != nil {
 		return util.NewError(_const.CommonException, _const.Bin, err)
 	}
