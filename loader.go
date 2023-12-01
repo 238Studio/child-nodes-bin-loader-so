@@ -98,7 +98,7 @@ func (so *SoPackage) Execute(method string, args []uintptr, re uintptr) (err err
 // LoadBinPackage 根据路径加在二进制包
 // 传入：路径
 // 传出：包对象,错误
-func (soLoader *SoLoader) LoadBinPackage(path string) (id int, err error) {
+func (soLoader *SoLoader) LoadBinPackage(path string) (name string, id int, err error) {
 	//捕获恐慌
 	defer func() {
 		if er := recover(); er != nil {
@@ -113,13 +113,13 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (id int, err error) {
 	//加载so包
 	so, err := plugin.Open(soPackagePath)
 	if err != nil {
-		return 0, util.NewError(_const.CommonException, _const.Bin, err)
+		return "", 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//加载so包对应的描述文件
 	content, err := os.ReadFile(soInfoPath)
 	if err != nil {
-		return 0, util.NewError(_const.CommonException, _const.Bin, err)
+		return "", 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//解析描述文件
@@ -129,7 +129,7 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (id int, err error) {
 	)
 	err = json.Unmarshal(content, &payload)
 	if err != nil {
-		return 0, util.NewError(_const.CommonException, _const.Bin, err)
+		return "", 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//创建包对象
@@ -157,7 +157,7 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (id int, err error) {
 	}
 	soLoader.Sos[soPackage.name][soPackage.id] = soPackage
 
-	return soPackage.id, nil
+	return soPackage.name, soPackage.id, nil
 }
 
 // ReleasePackage 释放so包
