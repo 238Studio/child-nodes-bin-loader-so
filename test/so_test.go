@@ -12,7 +12,8 @@ func TestSo(t *testing.T) {
 	a := "helloworld"
 	args[0] = uintptr(unsafe.Pointer(&a))
 	app := so.InitSoLoader()
-	id, err := app.LoadBinPackage("./test")
+
+	name, id, err := app.LoadBinPackage("./test")
 	if err != nil {
 		println(err.Error())
 		return
@@ -21,7 +22,8 @@ func TestSo(t *testing.T) {
 	var str = "外部"
 	println(&str)
 	re[0] = (uintptr)(unsafe.Pointer(&str))
-	binPackage := app.Sos["test"][id]
+
+	binPackage, err := app.GetBinPackage(name, id)
 
 	err = binPackage.Execute("Test1", args, uintptr(unsafe.Pointer(&re)))
 	//	re := execute[0]

@@ -189,3 +189,24 @@ func (soLoader *SoLoader) ReleasePackage(name string, id int) (err error) {
 
 	return nil
 }
+
+// GetBinPackage 获取so包
+// 传入：包名，id
+// 传出：包对象,错误
+func (soLoader *SoLoader) GetBinPackage(name string, id int) (soPackage *SoPackage, err error) {
+	//捕获恐慌
+	defer func() {
+		if er := recover(); er != nil {
+			//特例panic,级别非fatal,牵涉到cgo
+			err = util.NewError(_const.CommonException, _const.Bin, errors.New(er.(string)))
+		}
+	}()
+
+	//通过name和id获取so package
+	soPackage, isEXIST := soLoader.Sos[name][id]
+	if !isEXIST {
+		return nil, util.NewError(_const.CommonException, _const.Bin, errors.New("package not exist"))
+	}
+
+	return soPackage, nil
+}
