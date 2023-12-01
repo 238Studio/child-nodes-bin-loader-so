@@ -98,7 +98,7 @@ func (so *SoPackage) Execute(method string, args []uintptr, re uintptr) (err err
 // LoadBinPackage 根据路径加在二进制包
 // 传入：路径
 // 传出：包对象,错误
-func (soLoader *SoLoader) LoadBinPackage(path string) (soPackage *SoPackage, err error) {
+func (soLoader *SoLoader) LoadBinPackage(path string) (id int, err error) {
 	//捕获恐慌
 	defer func() {
 		if er := recover(); er != nil {
@@ -113,13 +113,13 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (soPackage *SoPackage, err
 	//加载so包
 	so, err := plugin.Open(soPackagePath)
 	if err != nil {
-		return nil, util.NewError(_const.CommonException, _const.Bin, err)
+		return 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//加载so包对应的描述文件
 	content, err := os.ReadFile(soInfoPath)
 	if err != nil {
-		return nil, util.NewError(_const.CommonException, _const.Bin, err)
+		return 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//解析描述文件
@@ -129,11 +129,11 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (soPackage *SoPackage, err
 	)
 	err = json.Unmarshal(content, &payload)
 	if err != nil {
-		return nil, util.NewError(_const.CommonException, _const.Bin, err)
+		return 0, util.NewError(_const.CommonException, _const.Bin, err)
 	}
 
 	//创建包对象
-	soPackage = &SoPackage{
+	soPackage := &SoPackage{
 		name:                 payload.Name,
 		id:                   0,
 		functions:            payload.Functions,
@@ -157,13 +157,13 @@ func (soLoader *SoLoader) LoadBinPackage(path string) (soPackage *SoPackage, err
 	}
 	soLoader.Sos[soPackage.name][soPackage.id] = soPackage
 
-	return soPackage, nil
+	return soPackage.id, nil
 }
 
 // ReleasePackage 释放so包
 // 传入：二进制执行包
 // 传出：错误
-func (soLoader *SoLoader) ReleasePackage(binPackage *loader.BinPackage) (err error) {
+func (soLoader *SoLoader) ReleasePackage(name string, id int) (err error) {
 	//捕获恐慌
 	defer func() {
 		if er := recover(); er != nil {
@@ -172,9 +172,20 @@ func (soLoader *SoLoader) ReleasePackage(binPackage *loader.BinPackage) (err err
 		}
 	}()
 
-	err = (*binPackage).Execute("Release", nil, 0)
+	//通过name和id获取so package
+	soPackage, isEXIST := soLoader.Sos[name][id]
+	if !isEXIST {
+		return util.NewError(_const.CommonException, _const.Bin, errors.New("package not exist"))
+	}
+
+	//释放so package
+	err = soPackage.Execute("Release", nil, 0)
 	if err != nil {
 		return util.NewError(_const.CommonException, _const.Bin, err)
 	}
+
+	//从集合中移除
+	delete(soLoader.Sos[name], id)
+
 	return nil
 }
