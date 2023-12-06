@@ -1,0 +1,13 @@
+{
+  "Name": "test",
+  "Functions": ["testFunc"],
+  "FunctionsArgsTypes":{
+    "testFunc":["string","string"]
+  },
+  "FunctionsReturnTypes":{
+    "testFunc":["string","string"]
+  },
+  "Info": {
+    "test0": "test0"
+  }
+}
